@@ -2,6 +2,8 @@
 
 🖥️ **Complete toolkit for WeAct Display FS 0.96" (160×80) USB displays on Linux**
 
+![WeAct 0.96" Display tool](https://github.com/CheshirCa/WeAct-FS-USB-Display-for-Linux/blob/main/demo.jpg) ![WeAct 0.96" Display Terminal](https://github.com/CheshirCa/WeAct-FS-USB-Display-for-Linux/blob/main/demo_console.jpg)
+
 Perfect for Raspberry Pi, Orange Pi, and other headless SBC debugging and monitoring!
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
