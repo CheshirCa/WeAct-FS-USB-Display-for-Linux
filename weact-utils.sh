@@ -133,7 +133,7 @@ show_temperature() {
             color="red"
         fi
         
-        echo "CPU: ${temp_c}°C" | $WEACTCLI -p "$port" --center -c $color -z 16
+        echo "CPU: ${temp_c}Â°C" | $WEACTCLI -p "$port" --center -c $color -z 16
         sleep 2
     done
 }

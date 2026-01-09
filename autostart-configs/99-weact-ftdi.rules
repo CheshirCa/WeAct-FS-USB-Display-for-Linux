@@ -1,0 +1,13 @@
+# WeAct Display - udev rule for FTDI USB-Serial chip
+#
+# Installation:
+#   sudo cp 99-weact-ftdi.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+#
+# VendorID:ProductID = 0403:6001 (FTDI FT232)
+
+ACTION=="add", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", \
+    TAG+="systemd", ENV{SYSTEMD_WANTS}="weactterm@%k.service", \
+    SYMLINK+="weact-display", MODE="0666", \
+    ENV{ID_MM_DEVICE_IGNORE}="1"

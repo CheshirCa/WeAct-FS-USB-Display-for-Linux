@@ -35,10 +35,10 @@ check_root() {
 
 # Print header
 print_header() {
-    echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║   WeActCLI Installation Script            ║${NC}"
-    echo -e "${BLUE}║   Linux/C version for Debian 11-13        ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—${NC}"
+    echo -e "${BLUE}â•‘   WeActCLI Installation Script            â•‘${NC}"
+    echo -e "${BLUE}â•‘   Linux/C version for Debian 11-13        â•‘${NC}"
+    echo -e "${BLUE}â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•${NC}"
     echo ""
 }
 
@@ -165,7 +165,7 @@ setup_permissions() {
         echo "Adding user $USER to dialout group..."
         sudo usermod -a -G dialout "$USER"
         echo -e "${GREEN}User added to dialout group${NC}"
-        echo -e "${YELLOW}⚠ You must logout and login again for changes to take effect${NC}"
+        echo -e "${YELLOW}âš  You must logout and login again for changes to take effect${NC}"
     else
         echo "User already in dialout group"
     fi
@@ -177,16 +177,16 @@ verify_installation() {
     echo -e "${YELLOW}Verifying installation...${NC}"
     
     if command -v weactcli &> /dev/null; then
-        echo -e "${GREEN}✓ weactcli command available${NC}"
+        echo -e "${GREEN}âœ“ weactcli command available${NC}"
         
         # Check version/help
         if weactcli --help &> /dev/null; then
-            echo -e "${GREEN}✓ weactcli is working${NC}"
+            echo -e "${GREEN}âœ“ weactcli is working${NC}"
         else
-            echo -e "${YELLOW}⚠ weactcli installed but may have issues${NC}"
+            echo -e "${YELLOW}âš  weactcli installed but may have issues${NC}"
         fi
     else
-        echo -e "${RED}✗ weactcli command not found${NC}"
+        echo -e "${RED}âœ— weactcli command not found${NC}"
         echo "Make sure $BINDIR is in your PATH"
         
         # Check if PATH update is needed
@@ -202,9 +202,9 @@ verify_installation() {
 
 # Post-installation info
 print_post_install() {
-    echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║   Installation Complete!                  ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—${NC}"
+    echo -e "${BLUE}â•‘   Installation Complete!                  â•‘${NC}"
+    echo -e "${BLUE}â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•${NC}"
     echo ""
     echo -e "${GREEN}What's next:${NC}"
     echo ""
@@ -224,7 +224,7 @@ print_post_install() {
     echo ""
     
     if ! groups | grep -q dialout; then
-        echo -e "${YELLOW}⚠ IMPORTANT: Logout and login again to apply group changes${NC}"
+        echo -e "${YELLOW}âš  IMPORTANT: Logout and login again to apply group changes${NC}"
         echo ""
     fi
     

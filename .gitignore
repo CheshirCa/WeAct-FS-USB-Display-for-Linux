@@ -1,0 +1,49 @@
+# Compiled binaries
+weactcli
+weactterm
+*.o
+*.a
+*.so
+*.dylib
+
+# Build artifacts
+*.out
+*.exe
+*.dll
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debugging
+*.dSYM/
+*.su
+*.idb
+*.pdb
+core
+vgcore.*
+
+# Distribution
+*.tar.gz
+*.zip
+dist/
+build/
+
+# Local configuration
+.env
+local.conf
+
+# Installation test directories
+test-install/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Log files
+*.log

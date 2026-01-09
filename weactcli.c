@@ -22,13 +22,58 @@
 #include <ctype.h>
 #include <sys/time.h>
 
+/* Font types */
+typedef enum {
+    FONT_MONO = 0,      /* Monospace (DejaVu Sans Mono) */
+    FONT_SANS,          /* Sans (DejaVu Sans) */
+    FONT_SERIF          /* Serif (DejaVu Serif) */
+} font_type_t;
+
+/* Default font paths */
+static const char *font_paths[][3] = {
+    /* FONT_MONO */
+    {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+        "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf"
+    },
+    /* FONT_SANS */
+    {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+    },
+    /* FONT_SERIF */
+    {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+        "/usr/share/fonts/TTF/DejaVuSerif.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"
+    }
+};
+
+/* Find font file for given type */
+static const char* find_font_path(font_type_t type) {
+    for (int i = 0; i < 3; i++) {
+        const char *path = font_paths[type][i];
+        FILE *f = fopen(path, "r");
+        if (f) {
+            fclose(f);
+            return path;
+        }
+    }
+    return NULL;
+}
+
 /* Configuration structure */
 typedef struct {
     char port[256];
     char text[8192];
     char file_path[512];
+    char font_path[512];
+    font_type_t font_type;
     uint16_t color;
     int font_size;
+    int orientation;  /* -1 = no change, 0-3 = orientation value */
     bool center;
     bool clear_only;
     bool verbose;
@@ -43,8 +88,11 @@ static cli_config_t config = {
     .port = "/dev/ttyUSB0",
     .text = "",
     .file_path = "",
+    .font_path = "",
+    .font_type = FONT_SANS,  /* Default to Sans for compatibility */
     .color = WEACT_WHITE,
     .font_size = FT_FONT_SIZE_MEDIUM,
+    .orientation = -1,  /* No change by default */
     .center = false,
     .clear_only = false,
     .verbose = false,
@@ -177,11 +225,20 @@ static void show_help(const char *prog_name) {
     printf("  -p, --port PORT       Serial port (required, e.g., /dev/ttyUSB0)\n");
     printf("  -c, --color COLOR     Text color: red, green, blue, white, black,\n");
     printf("                        yellow, cyan, magenta (default: white)\n");
+    printf("  -t, --font TYPE       Font type: mono, sans, serif (default: sans)\n");
+    printf("                        mono  = Monospace (fixed width, good for tables)\n");
+    printf("                        sans  = Sans-serif (default, proportional)\n");
+    printf("                        serif = Serif (proportional)\n");
     printf("  -s, --scroll SPEED[:DIR]\n");
     printf("                        Scroll speed (px/s) and direction (u=up, d=down)\n");
     printf("                        Example: -s 25.5:u or -s 40:d\n");
     printf("  -z, --size SIZE       Font size: 8 (small), 12 (medium), 16 (large)\n");
     printf("                        Default: 12\n");
+    printf("  -r, --rotate ORIENT   Rotate display:\n");
+    printf("                        0 = Portrait (80x160)\n");
+    printf("                        1 = Reverse Portrait (80x160, upside down)\n");
+    printf("                        2 = Landscape (160x80, default)\n");
+    printf("                        3 = Reverse Landscape (160x80, upside down)\n");
     printf("  -f, --file FILE       Load text from file\n");
     printf("  -i, --stdin           Read from stdin (auto-detected with pipes)\n");
     printf("  --center              Center text horizontally\n");
@@ -190,9 +247,25 @@ static void show_help(const char *prog_name) {
     printf("  -h, --help            Show this help\n");
     printf("\n");
     printf("EXAMPLES:\n");
-    printf("  %s -p /dev/ttyUSB0 -c green --center \"Status: OK\"\n", prog_name);
+    printf("  # Simple text\n");
+    printf("  %s -p /dev/ttyUSB0 \"Hello World\"\n", prog_name);
+    printf("\n");
+    printf("  # Centered green text with large font\n");
+    printf("  %s -p /dev/ttyUSB0 -c green --center -z 16 \"Status: OK\"\n", prog_name);
+    printf("\n");
+    printf("  # Monospace font (good for tables/code)\n");
+    printf("  %s -p /dev/ttyUSB0 -t mono \"Column1  Column2\"\n", prog_name);
+    printf("\n");
+    printf("  # Portrait mode (rotate 0 or 1)\n");
+    printf("  %s -p /dev/ttyUSB0 -r 0 \"Vertical text\"\n", prog_name);
+    printf("\n");
+    printf("  # Scrolling text\n");
     printf("  %s -p /dev/ttyUSB0 -s 25.5:u \"Scrolling text...\"\n", prog_name);
-    printf("  dir | %s -p /dev/ttyUSB0 -c yellow\n", prog_name);
+    printf("\n");
+    printf("  # Pipe from command\n");
+    printf("  date | %s -p /dev/ttyUSB0 -c yellow --center\n", prog_name);
+    printf("\n");
+    printf("  # Clear screen\n");
     printf("  %s -p /dev/ttyUSB0 --cls\n", prog_name);
     printf("\n");
     printf("NOTES:\n");
@@ -200,6 +273,8 @@ static void show_help(const char *prog_name) {
     printf("  - File input has priority over stdin\n");
     printf("  - Stdin has priority over command line text\n");
     printf("  - Common ports: /dev/ttyUSB0, /dev/ttyACM0, /dev/ttyS0\n");
+    printf("  - Use monospace font (-t mono) for better alignment\n");
+    printf("  - Orientation: 2 (landscape) is default, 0/1 for portrait\n");
     printf("\n");
 }
 
@@ -357,8 +432,10 @@ int main(int argc, char *argv[]) {
     static struct option long_options[] = {
         {"port",    required_argument, 0, 'p'},
         {"color",   required_argument, 0, 'c'},
+        {"font",    required_argument, 0, 't'},
         {"scroll",  required_argument, 0, 's'},
         {"size",    required_argument, 0, 'z'},
+        {"rotate",  required_argument, 0, 'r'},
         {"file",    required_argument, 0, 'f'},
         {"stdin",   no_argument,       0, 'i'},
         {"center",  no_argument,       0, 'C'},
@@ -372,7 +449,7 @@ int main(int argc, char *argv[]) {
     int option_index = 0;
     bool port_specified = false;
     
-    while ((opt = getopt_long(argc, argv, "p:c:s:z:f:iCLvh", 
+    while ((opt = getopt_long(argc, argv, "p:c:t:s:z:r:f:iCLvh", 
                               long_options, &option_index)) != -1) {
         switch (opt) {
             case 'p':
@@ -382,11 +459,33 @@ int main(int argc, char *argv[]) {
             case 'c':
                 config.color = parse_color(optarg);
                 break;
+            case 't':
+                /* Font type */
+                if (strcasecmp(optarg, "mono") == 0 || strcasecmp(optarg, "monospace") == 0) {
+                    config.font_type = FONT_MONO;
+                } else if (strcasecmp(optarg, "sans") == 0) {
+                    config.font_type = FONT_SANS;
+                } else if (strcasecmp(optarg, "serif") == 0) {
+                    config.font_type = FONT_SERIF;
+                } else {
+                    fprintf(stderr, "Warning: Unknown font type '%s', using sans\n", optarg);
+                    config.font_type = FONT_SANS;
+                }
+                break;
             case 's':
                 config.scroll = parse_scroll(optarg);
                 break;
             case 'z':
                 config.font_size = parse_font_size(optarg);
+                break;
+            case 'r':
+                /* Rotation/orientation */
+                config.orientation = atoi(optarg);
+                if (config.orientation < 0 || config.orientation > 3) {
+                    fprintf(stderr, "Warning: Invalid orientation %d, must be 0-3\n", 
+                            config.orientation);
+                    config.orientation = -1;  /* No change */
+                }
                 break;
             case 'f':
                 strncpy(config.file_path, optarg, sizeof(config.file_path) - 1);
@@ -452,7 +551,16 @@ int main(int argc, char *argv[]) {
         printf("=== WeActCLI Configuration ===\n");
         printf("Port: %s\n", config.port);
         printf("Color: 0x%04X\n", config.color);
+        printf("Font type: %s\n", 
+               config.font_type == FONT_MONO ? "Monospace" :
+               config.font_type == FONT_SANS ? "Sans" : "Serif");
         printf("Font size: %d\n", config.font_size);
+        if (config.orientation >= 0) {
+            printf("Orientation: %d (%s)\n", config.orientation,
+                   config.orientation == 0 ? "Portrait" :
+                   config.orientation == 1 ? "Reverse Portrait" :
+                   config.orientation == 2 ? "Landscape" : "Reverse Landscape");
+        }
         printf("Center: %s\n", config.center ? "yes" : "no");
         printf("Clear only: %s\n", config.clear_only ? "yes" : "no");
         printf("Scroll: %s\n", config.scroll ? "yes" : "no");
@@ -491,6 +599,22 @@ int main(int argc, char *argv[]) {
         printf("Display initialized: %s\n", info);
     }
     
+    /* Apply orientation if specified */
+    if (config.orientation >= 0) {
+        if (config.verbose) {
+            printf("Setting orientation to %d\n", config.orientation);
+        }
+        if (!weact_set_orientation(&display, (weact_orientation_t)config.orientation)) {
+            fprintf(stderr, "Warning: Failed to set orientation: %s\n", 
+                    weact_get_last_error(&display));
+        } else if (config.verbose) {
+            printf("Orientation set successfully\n");
+            printf("New dimensions: %dx%d\n", 
+                   weact_get_display_width(&display),
+                   weact_get_display_height(&display));
+        }
+    }
+    
     /* Clear screen only mode */
     if (config.clear_only) {
         weact_clear_buffer(&display, WEACT_BLACK);
@@ -504,8 +628,22 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     
-    /* Initialize FreeType text renderer with Cyrillic support */
-    ft_text_context_t *text_ctx = ft_text_init(&display, NULL, config.font_size);
+    /* Find font file */
+    const char *font_path = find_font_path(config.font_type);
+    if (!font_path) {
+        fprintf(stderr, "Error: Could not find suitable font\n");
+        fprintf(stderr, "Please install fonts-dejavu or fonts-liberation:\n");
+        fprintf(stderr, "  sudo apt-get install fonts-dejavu fonts-liberation\n");
+        weact_close(&display);
+        return 1;
+    }
+    
+    if (config.verbose) {
+        printf("Using font: %s\n", font_path);
+    }
+    
+    /* Initialize FreeType text renderer with selected font */
+    ft_text_context_t *text_ctx = ft_text_init(&display, font_path, config.font_size);
     if (!text_ctx) {
         fprintf(stderr, "Error: Failed to initialize FreeType text renderer\n");
         fprintf(stderr, "Make sure libfreetype6 is installed:\n");

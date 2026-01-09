@@ -1,108 +1,92 @@
-# WeActCLI - Quick Start Guide
+# QuickStart Guide
 
-Ultra-fast guide to get started with WeActCLI in 5 minutes.
+Get started with WeAct Display Tools in 5 minutes!
 
-## ⚡ 1-Minute Installation
+## 📦 Installation
 
 ```bash
-./install.sh
+# 1. Clone repository
+git clone https://github.com/yourusername/weact-display-tools.git
+cd weact-display-tools
+
+# 2. Install dependencies (Debian/Ubuntu)
+sudo apt-get update
+sudo apt-get install build-essential libfreetype6-dev pkg-config
+
+# 3. Build and install
+make
+sudo make install
+
+# 4. Add user to dialout group
+sudo usermod -aG dialout $USER
+# Then logout and login again
 ```
 
-That's it! The script will:
-- Check dependencies
-- Build the project
-- Install to `/usr/local/bin`
-- Setup permissions
-
-## ⚡ First Test
+## 🚀 First Test
 
 ```bash
-# Find your device
-ls -l /dev/ttyUSB* /dev/ttyACM*
+# Find your display
+ls -l /dev/ttyACM0  # or /dev/ttyUSB0
 
-# Test display (replace port with yours)
-weactcli -p /dev/ttyUSB0 "Hello World!"
+# Test text display
+weactcli -p /dev/ttyACM0 "Hello World!"
+
+# Test with color
+weactcli -p /dev/ttyACM0 --center -c green "Success!"
+
+# Test terminal
+weactterm -p /dev/ttyACM0
+# Type: ip addr show
+# Press Ctrl+C to exit
 ```
 
-## ⚡ Most Used Commands
+## 📖 Common Commands
 
 ```bash
-# Simple text
-weactcli -p /dev/ttyUSB0 "Your text"
-
-# With color
-weactcli -p /dev/ttyUSB0 -c green "Status: OK"
-
-# Centered
-weactcli -p /dev/ttyUSB0 --center "Welcome"
-
-# Scrolling
-weactcli -p /dev/ttyUSB0 -s 30:u "Scrolling..."
-
-# From pipe
-echo "Test" | weactcli -p /dev/ttyUSB0
+# Display text
+weactcli -p /dev/ttyACM0 "Your text here"
 
 # Clear screen
-weactcli -p /dev/ttyUSB0 --cls
-```
+weactcli -p /dev/ttyACM0 --cls
 
-## ⚡ Utilities
+# Start terminal
+weactterm -p /dev/ttyACM0
 
-```bash
-# Clock
+# Show clock
 weact-utils clock
 
-# System status
+# Show system status
 weact-utils status
-
-# Network info
-weact-utils network
-
-# Countdown timer
-weact-utils countdown /dev/ttyUSB0 30
 ```
 
-## ⚠️ Common Issues
+## 🐛 Problems?
 
-### "Permission denied"
 ```bash
-sudo usermod -a -G dialout $USER
-# Then logout and login
+# Permission denied?
+sudo usermod -aG dialout $USER  # Then logout/login
+
+# Can't find device?
+ls -l /dev/ttyACM* /dev/ttyUSB*  # Find your device
+
+# Text not showing?
+weactcli -p /dev/ttyACM0 --cls   # Clear first
+weactcli -p /dev/ttyACM0 -v "Test"  # Verbose mode
 ```
 
-### "Device not found"
-```bash
-# List devices
-ls -l /dev/ttyUSB* /dev/ttyACM*
+## 📚 Full Documentation
 
-# Or use auto-detect
-weact-utils detect
-```
-
-### "Command not found"
-```bash
-# Add to PATH
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-## 📖 Full Documentation
-
-- `README.md` - Complete documentation
-- `INSTALL.md` - Detailed installation guide
-- `weactcli --help` - Command-line help
-- `weact-utils help` - Utilities help
+- [README.md](README.md) - Complete overview
+- [docs/CLI_GUIDE.md](docs/CLI_GUIDE.md) - Text display guide
+- [docs/TERMINAL.md](docs/TERMINAL.md) - Terminal emulator guide
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) - Solve problems
 
 ## 🎯 What's Next?
 
-1. **Try utilities:** `weact-utils help`
-2. **Read examples:** `cat README.md`
-3. **Write your own:** Check `example.c`
-4. **Create scripts:** Use in bash scripts
-5. **Monitor system:** Real-time display updates
+1. **Learn more**: Read [CLI_GUIDE.md](docs/CLI_GUIDE.md)
+2. **Try terminal**: See [TERMINAL.md](docs/TERMINAL.md)
+3. **Explore utilities**: Run `weact-utils help`
+4. **Build custom app**: Check [API_REFERENCE.md](docs/API_REFERENCE.md)
 
 ---
 
-That's all you need to get started! 🚀
-
-For more details, see `README.md` and `INSTALL.md`.
+**Ready to go!** 🎉

@@ -1,0 +1,54 @@
+# WeActTerm systemd service
+# Auto-starts weactterm when USB display is connected
+#
+# Installation:
+#   1. Edit this file and replace 'pi' with your username
+#   2. sudo cp weactterm@.service /etc/systemd/system/
+#   3. sudo systemctl daemon-reload
+#
+# This service is triggered automatically by udev rules
+
+[Unit]
+Description=WeActTerm Terminal on %I
+Documentation=https://github.com/yourusername/weact-display-tools
+After=multi-user.target
+
+[Service]
+Type=simple
+
+# Command to run (customize as needed)
+# Options:
+#   -f mono = Monospace font (recommended for terminal)
+#   -z 12   = Font size 12pt (good readability)
+#   --flip  = Flip display 180° (if mounted upside-down)
+#   Change to -z 10 for more text, -z 8 for maximum text
+ExecStart=/usr/local/bin/weactterm -p /dev/%i -f mono -z 12
+
+# If your display is mounted upside-down, uncomment:
+# ExecStart=/usr/local/bin/weactterm -p /dev/%i -f mono -z 12 --flip
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+# User and group
+# IMPORTANT: Change 'pi' to your username!
+User=pi
+Group=dialout
+
+# Environment
+Environment="TERM=linux"
+Environment="HOME=/home/pi"
+
+# Security (optional - uncomment for stricter security)
+#PrivateTmp=yes
+#ProtectSystem=strict
+#ProtectHome=yes
+#NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
