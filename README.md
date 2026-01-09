@@ -1,8 +1,8 @@
 # WeActCLI v2.0.1
 
-## Full Cyrillic Support for Linux! 🔤
+![WeAct 0.96" Display in Linux](https://github.com/CheshirCa/WeAct-FS-USB-Display-for-Linux/blob/main/demo.jpg)
 
-Console utility for WeAct Display FS 0.96-inch (160x80) USB display.
+## Console utility for WeAct Display FS 0.96-inch (160x80) USB display.
 
 ### What's New in v2.0.1
 - ✅ **Fixed text clipping** - Text no longer cuts off at top of screen
