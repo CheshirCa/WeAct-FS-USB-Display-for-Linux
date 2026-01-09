@@ -183,9 +183,6 @@ sudo make install
 
 - **[TERMINAL.md](docs/TERMINAL.md)** - Complete guide for `weactterm` terminal emulator
 - **[CLI_GUIDE.md](docs/CLI_GUIDE.md)** - Detailed `weactcli` usage and examples
-- **[UTILS_GUIDE.md](docs/UTILS_GUIDE.md)** - `weact-utils` scripts documentation
-- **[CYRILLIC_GUIDE.md](docs/CYRILLIC_GUIDE.md)** - Cyrillic text support guide
-- **[API_REFERENCE.md](docs/API_REFERENCE.md)** - Library API for custom applications
 - **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ## 🎯 Use Cases
